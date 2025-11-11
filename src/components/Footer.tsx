@@ -9,7 +9,7 @@ const Footer = () => {
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-hero rounded-lg"></div>
               <span className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-                ArtistHub
+                KalaKriti
               </span>
             </div>
             <p className="text-muted-foreground">
@@ -63,7 +63,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-border pt-8 text-center text-muted-foreground">
-          <p>&copy; 2025 ArtistHub. All rights reserved.</p>
+          <p>&copy; 2025 KalaKriti. All rights reserved.</p>
         </div>
       </div>
     </footer>

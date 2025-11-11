@@ -8,7 +8,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-hero rounded-lg"></div>
             <span className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-              ArtistHub
+              KalaKriti
             </span>
           </div>
           

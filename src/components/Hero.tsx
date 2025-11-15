@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import heroArt from "@/assets/hero-art.jpg";
 import { ArrowRight, Sparkles } from "lucide-react";
@@ -38,20 +39,24 @@ const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Button 
-              size="lg" 
-              className="bg-gradient-hero border-0 hover:opacity-90 transition-opacity text-lg px-8 py-6 shadow-glow"
-            >
-              Start Your Journey
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="text-lg px-8 py-6 border-2"
-            >
-              Explore Gallery
-            </Button>
+            <Link to="/register">
+              <Button 
+                size="lg" 
+                className="bg-gradient-hero border-0 hover:opacity-90 transition-opacity text-lg px-8 py-6 shadow-glow"
+              >
+                Start Your Journey
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
+            <Link to="/gallery">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="text-lg px-8 py-6 border-2"
+              >
+                Explore Gallery
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

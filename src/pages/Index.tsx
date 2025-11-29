@@ -1,169 +1,199 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import Features from "@/components/Features";
-import HowItWorks from "@/components/HowItWorks";
-import Gallery from "@/components/Gallery";
-import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import StoriesStrip from "@/components/StoriesStrip";
+import FeedCard from "@/components/FeedCard";
+import Sidebar from "@/components/Sidebar";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { 
-  LogIn, UserPlus, Lock, Mail, 
-  Home, Image, Users, Tag, 
-  FolderOpen, TrendingUp, Sparkles,
-  ShoppingCart, CreditCard, Package,
-  Heart, User, MapPin, History,
-  Palette, Upload, BarChart3, DollarSign,
-  Bell, MessageSquare, Activity, Star,
-  HelpCircle, Truck, RefreshCw, Shield, FileText
-} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Search, Sparkles, Loader2 } from "lucide-react";
 
 const Index = () => {
-  const pageCategories = [
-    {
-      title: "Authentication",
-      icon: LogIn,
-      pages: [
-        { name: "Login", path: "/login", icon: LogIn },
-        { name: "Register", path: "/register", icon: UserPlus },
-        { name: "Forgot Password", path: "/forgot-password", icon: Lock },
-        { name: "Verify Email", path: "/verify-email", icon: Mail },
-      ],
-    },
-    {
-      title: "Public Pages",
-      icon: Home,
-      pages: [
-        { name: "Homepage", path: "/home", icon: Home },
-        { name: "Gallery", path: "/gallery", icon: Image },
-        { name: "Artists", path: "/artists", icon: Users },
-        { name: "Categories", path: "/categories", icon: Tag },
-        { name: "Collections", path: "/collections", icon: FolderOpen },
-        { name: "About", path: "/about", icon: FileText },
-        { name: "Contact", path: "/contact", icon: MessageSquare },
-      ],
-    },
-    {
-      title: "User Account",
-      icon: User,
-      pages: [
-        { name: "Dashboard", path: "/dashboard", icon: Home },
-        { name: "Profile", path: "/profile", icon: User },
-        { name: "Favorites", path: "/favorites", icon: Heart },
-        { name: "Following", path: "/following", icon: Users },
-        { name: "Order History", path: "/orders", icon: History },
-        { name: "Address Book", path: "/addresses", icon: MapPin },
-      ],
-    },
-    {
-      title: "Artist Pages",
-      icon: Palette,
-      pages: [
-        { name: "Artist Dashboard", path: "/artist/dashboard", icon: Home },
-        { name: "My Artworks", path: "/artist/artworks", icon: Image },
-        { name: "Upload Art", path: "/artist/upload", icon: Upload },
-        { name: "Earnings", path: "/artist/earnings", icon: DollarSign },
-        { name: "Analytics", path: "/artist/analytics", icon: BarChart3 },
-        { name: "Orders", path: "/artist/orders", icon: Package },
-        { name: "Commissions", path: "/artist/commissions", icon: MessageSquare },
-      ],
-    },
-    {
-      title: "E-commerce",
-      icon: ShoppingCart,
-      pages: [
-        { name: "Shopping Cart", path: "/cart", icon: ShoppingCart },
-        { name: "Checkout", path: "/checkout", icon: CreditCard },
-        { name: "Order Confirmation", path: "/order-confirmation", icon: Package },
-      ],
-    },
-    {
-      title: "Discovery",
-      icon: Sparkles,
-      pages: [
-        { name: "Search Results", path: "/search", icon: Sparkles },
-        { name: "New Arrivals", path: "/new-arrivals", icon: TrendingUp },
-        { name: "Popular", path: "/popular", icon: TrendingUp },
-      ],
-    },
-    {
-      title: "Community",
-      icon: Users,
-      pages: [
-        { name: "Notifications", path: "/notifications", icon: Bell },
-        { name: "Messages", path: "/messages", icon: MessageSquare },
-        { name: "Activity Feed", path: "/activity", icon: Activity },
-        { name: "Reviews", path: "/reviews", icon: Star },
-      ],
-    },
-    {
-      title: "Support",
-      icon: HelpCircle,
-      pages: [
-        { name: "Help Center", path: "/help", icon: HelpCircle },
-        { name: "Shipping Info", path: "/shipping", icon: Truck },
-        { name: "Returns Policy", path: "/returns", icon: RefreshCw },
-        { name: "Privacy Policy", path: "/privacy", icon: Shield },
-        { name: "Terms of Service", path: "/terms", icon: FileText },
-      ],
-    },
-  ];
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const popularTags = ["dashboard", "logo", "card", "illustration", "ui", "branding", "mobile", "web"];
+
+  // Generate feed items
+  const generateFeedItems = (count: number, startId: number = 1) => {
+    return Array.from({ length: count }, (_, i) => ({
+      id: startId + i,
+      title: `Artwork ${startId + i}`,
+      artist: `Artist ${((startId + i) % 10) + 1}`,
+      artistId: ((startId + i) % 10) + 1,
+      image: "",
+      likes: Math.floor(Math.random() * 500) + 50,
+      comments: Math.floor(Math.random() * 100) + 10,
+      views: Math.floor(Math.random() * 5000) + 500,
+      isFeatured: i === 2 || i === 8, // Make some items featured
+    }));
+  };
+
+  const [feedItems, setFeedItems] = useState(generateFeedItems(12));
+
+  const loadMore = () => {
+    setLoading(true);
+    setTimeout(() => {
+      const newItems = generateFeedItems(12, feedItems.length + 1);
+      setFeedItems([...feedItems, ...newItems]);
+      setPage(page + 1);
+      setLoading(false);
+    }, 1000);
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >= document.documentElement.offsetHeight - 1000 &&
+        !loading
+      ) {
+        loadMore();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loading, feedItems.length]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      <Hero />
-      <Features />
-      <HowItWorks />
-      <Gallery />
       
-      {/* All Pages Navigation Section */}
-      <section className="py-24 bg-gradient-subtle">
+      {/* Hero & Search Section */}
+      <section className="pt-24 pb-8 bg-gradient-subtle border-b">
         <div className="container mx-auto px-6">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Explore All{" "}
-              <span className="bg-gradient-hero bg-clip-text text-transparent">
-                Pages
-              </span>
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Navigate to any page in the application. All pages are ready and fully functional.
-            </p>
-          </div>
+          <div className="max-w-4xl mx-auto">
+            {/* Hero Text */}
+            <div className="text-center mb-8">
+              <h1 className="text-4xl md:text-6xl font-bold mb-4">
+                Discover the World's{" "}
+                <span className="bg-gradient-hero bg-clip-text text-transparent">
+                  Top Designers
+                </span>
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Explore, connect, and get inspired by the best digital artists and designers from around the globe.
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {pageCategories.map((category, categoryIndex) => (
-              <Card key={categoryIndex} className="hover:shadow-medium transition-all duration-300">
-                <CardHeader>
-                  <div className="flex items-center space-x-3 mb-2">
-                    <div className="w-10 h-10 bg-gradient-hero rounded-full flex items-center justify-center opacity-20">
-                      <category.icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <CardTitle className="text-lg">{category.title}</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {category.pages.map((page, pageIndex) => (
-                    <Link key={pageIndex} to={page.path}>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start text-left h-auto py-2 px-3 hover:bg-primary/10"
-                      >
-                        <page.icon className="w-4 h-4 mr-2" />
-                        <span className="text-sm">{page.name}</span>
-                      </Button>
-                    </Link>
-                  ))}
-                </CardContent>
-              </Card>
-            ))}
+            {/* Search Bar */}
+            <div className="relative mb-6">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search for designs, artists, or tags..."
+                className="pl-12 h-14 text-lg"
+              />
+            </div>
+
+            {/* Popular Tags */}
+            <div className="flex flex-wrap items-center gap-2 mb-6">
+              <span className="text-sm text-muted-foreground">Popular:</span>
+              {popularTags.map((tag) => (
+                <Link key={tag} to={`/search?q=${tag}`}>
+                  <Badge variant="secondary" className="cursor-pointer hover:bg-primary/10 px-3 py-1">
+                    {tag}
+                  </Badge>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      <CTA />
+      {/* Stories Strip */}
+      <div className="bg-background border-b py-4">
+        <StoriesStrip />
+      </div>
+
+      {/* Main Feed Section */}
+      <section className="py-8">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Left Sidebar - Desktop Only */}
+            <div className="hidden lg:block lg:col-span-1">
+              <Sidebar />
+            </div>
+
+            {/* Main Feed */}
+            <div className="lg:col-span-2">
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-2xl font-bold flex items-center">
+                  <Sparkles className="w-6 h-6 mr-2 text-primary" />
+                  Explore Feed
+                </h2>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">Latest</Button>
+                  <Button variant="outline" size="sm">Popular</Button>
+                  <Button variant="outline" size="sm">Trending</Button>
+                </div>
+              </div>
+
+              {/* Feed Grid - Masonry/Staggered Layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-max">
+                {feedItems.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className={item.isFeatured ? "md:col-span-2" : ""}
+                  >
+                    <FeedCard {...item} />
+                  </div>
+                ))}
+              </div>
+
+              {/* Load More */}
+              <div className="flex justify-center mt-8">
+                {loading ? (
+                  <Button disabled>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Loading...
+                  </Button>
+                ) : (
+                  <Button onClick={loadMore} variant="outline">
+                    Load More
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Right Sidebar - Desktop Only */}
+            <div className="hidden lg:block lg:col-span-1">
+              <div className="sticky top-24 space-y-6">
+                {/* Promotional Banner */}
+                <div className="bg-gradient-hero rounded-lg p-6 text-white">
+                  <h3 className="font-bold text-lg mb-2">Get Hired</h3>
+                  <p className="text-sm text-white/80 mb-4">
+                    Connect with clients looking for your skills
+                  </p>
+                  <Link to="/register">
+                    <Button className="w-full bg-white text-primary hover:bg-white/90">
+                      Join as Artist
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* Curated Collections */}
+                <div className="bg-card border rounded-lg p-6">
+                  <h3 className="font-bold mb-4">Curated Collections</h3>
+                  <div className="space-y-3">
+                    {["Abstract Dreams", "Digital Portraits", "Nature's Beauty"].map((collection, i) => (
+                      <Link key={i} to="/collections" className="block group">
+                        <div className="aspect-video bg-gradient-hero opacity-20 rounded-lg mb-2 group-hover:opacity-30 transition-opacity"></div>
+                        <p className="text-sm font-medium group-hover:text-primary transition-colors">
+                          {collection}
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );

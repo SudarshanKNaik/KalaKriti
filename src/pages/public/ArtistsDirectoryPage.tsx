@@ -1,23 +1,52 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, UserPlus, Palette, Star, Users } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Search, UserPlus, Palette } from "lucide-react";
+import api from "@/lib/api";
+
+interface Artist {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  profileImage?: string;
+}
 
 const ArtistsDirectoryPage = () => {
-  const artists = Array.from({ length: 12 }, (_, i) => ({
-    id: i + 1,
-    name: `Artist ${i + 1}`,
-    username: `@artist${i + 1}`,
-    followers: Math.floor(Math.random() * 20000 + 1000),
-    artworks: Math.floor(Math.random() * 100 + 10),
-    rating: (Math.random() * 1 + 4).toFixed(1),
-    category: ["Digital Art", "Abstract", "Portraits", "Landscape"][i % 4],
-    verified: i % 3 === 0,
-  }));
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchArtists();
+  }, []);
+
+  const fetchArtists = async () => {
+    try {
+      setLoading(true);
+      // This would need a backend endpoint to get all artists
+      // For now, we'll show empty state
+      setArtists([]);
+    } catch (err) {
+      console.error('Failed to fetch artists:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getUserInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -53,10 +82,10 @@ const ArtistsDirectoryPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="painting">Painting</SelectItem>
                   <SelectItem value="digital">Digital Art</SelectItem>
-                  <SelectItem value="abstract">Abstract</SelectItem>
-                  <SelectItem value="portraits">Portraits</SelectItem>
-                  <SelectItem value="landscape">Landscape</SelectItem>
+                  <SelectItem value="sculpture">Sculpture</SelectItem>
+                  <SelectItem value="photography">Photography</SelectItem>
                 </SelectContent>
               </Select>
               <Select>
@@ -66,63 +95,62 @@ const ArtistsDirectoryPage = () => {
                 <SelectContent>
                   <SelectItem value="popular">Most Popular</SelectItem>
                   <SelectItem value="newest">Newest</SelectItem>
-                  <SelectItem value="rating">Highest Rated</SelectItem>
                   <SelectItem value="artworks">Most Artworks</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {/* Artists Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {artists.map((artist) => (
-              <Link key={artist.id} to={`/artists/${artist.id}`}>
-                <Card className="p-6 hover:shadow-medium transition-all duration-300 group cursor-pointer text-center">
-                  <div className="w-24 h-24 bg-gradient-hero rounded-full mx-auto mb-4 group-hover:scale-110 transition-transform"></div>
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <h3 className="font-bold text-lg">{artist.name}</h3>
-                    {artist.verified && (
-                      <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
-                        Verified
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">{artist.username}</p>
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center justify-center space-x-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm font-medium">{artist.rating}</span>
-                    </div>
-                    <div className="flex items-center justify-center space-x-4 text-sm text-muted-foreground">
-                      <div className="flex items-center space-x-1">
-                        <Users className="w-4 h-4" />
-                        <span>{artist.followers.toLocaleString()}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Palette className="w-4 h-4" />
-                        <span>{artist.artworks}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <Button className="w-full bg-gradient-hero border-0">
-                    <UserPlus className="mr-2 w-4 h-4" />
-                    Follow
-                  </Button>
-                </Card>
-              </Link>
-            ))}
-          </div>
-
-          {/* Pagination */}
-          <div className="flex justify-center mt-12">
-            <div className="flex gap-2">
-              <Button variant="outline">Previous</Button>
-              <Button className="bg-gradient-hero border-0">1</Button>
-              <Button variant="outline">2</Button>
-              <Button variant="outline">3</Button>
-              <Button variant="outline">Next</Button>
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Loading artists...</p>
             </div>
-          </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && artists.length === 0 && (
+            <div className="text-center py-12">
+              <div className="mb-4">
+                <div className="w-24 h-24 bg-muted rounded-full mx-auto flex items-center justify-center">
+                  <Palette className="w-12 h-12 text-muted-foreground" />
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold mb-2">No artists yet</h3>
+              <p className="text-muted-foreground">Artists will appear here once they start uploading artworks</p>
+            </div>
+          )}
+
+          {/* Artists Grid */}
+          {!loading && artists.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {artists.map((artist) => (
+                <Link key={artist._id} to={`/artists/${artist._id}`}>
+                  <Card className="p-6 hover:shadow-medium transition-all duration-300 group cursor-pointer text-center">
+                    <Avatar className="w-24 h-24 mx-auto mb-4 group-hover:scale-110 transition-transform">
+                      <AvatarImage src={artist.profileImage} alt={artist.name} />
+                      <AvatarFallback className="bg-gradient-hero text-white text-2xl">
+                        {getUserInitials(artist.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                      <h3 className="font-bold text-lg">{artist.name}</h3>
+                      {artist.role === 'artist' || artist.role === 'both' && (
+                        <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                          Artist
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">{artist.email}</p>
+                    <Button className="w-full bg-gradient-hero border-0">
+                      <UserPlus className="mr-2 w-4 h-4" />
+                      Follow
+                    </Button>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <Footer />
@@ -131,4 +159,3 @@ const ArtistsDirectoryPage = () => {
 };
 
 export default ArtistsDirectoryPage;
-

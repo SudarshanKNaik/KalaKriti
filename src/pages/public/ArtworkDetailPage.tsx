@@ -200,3 +200,4 @@ const ArtworkDetailPage = () => {
 
 export default ArtworkDetailPage;
 
+

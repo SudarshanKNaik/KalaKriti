@@ -8,9 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowRight, ArrowLeft } from "lucide-react";
+import { handlePayment } from "@/lib/payment";
+import { useToast } from "@/components/ui/use-toast";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     email: "",
@@ -202,8 +205,25 @@ const CheckoutPage = () => {
                         <ArrowLeft className="mr-2 w-4 h-4" />
                         Back
                       </Button>
-                      <Button onClick={() => navigate("/order-confirmation")} className="flex-1 bg-gradient-hero border-0">
-                        Place Order
+                      <Button onClick={() => {
+                        handlePayment(
+                          orderSummary.total,
+                          { name: formData.shippingAddress.name, email: formData.email },
+                          (response) => {
+                            console.log(response);
+                            navigate("/order-confirmation");
+                          },
+                          (error) => {
+                            console.error(error);
+                            toast({
+                              title: "Payment Failed",
+                              description: "Please try again.",
+                              variant: "destructive",
+                            });
+                          }
+                        );
+                      }} className="flex-1 bg-gradient-hero border-0">
+                        Pay with Razorpay
                       </Button>
                     </div>
                   </CardContent>
@@ -244,4 +264,6 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
+
+
 

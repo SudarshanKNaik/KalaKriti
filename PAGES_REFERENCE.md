@@ -146,3 +146,5 @@ All pages are:
 3. All pages use the same Navbar and Footer components
 4. All pages follow the same design system with gradients and styling
 
+
+

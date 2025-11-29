@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -7,20 +7,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Heart, Star, Filter, Search, Grid, List } from "lucide-react";
+import api from "@/lib/api";
+
+interface Artwork {
+  _id: string;
+  title: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  category: string;
+  artist: {
+    _id: string;
+    name: string;
+  };
+}
 
 const GalleryPage = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
+  const [artworks, setArtworks] = useState<Artwork[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const artworks = Array.from({ length: 12 }, (_, i) => ({
-    id: i + 1,
-    title: `Artwork ${i + 1}`,
-    artist: `Artist ${i + 1}`,
-    price: `$${(Math.random() * 500 + 50).toFixed(0)}`,
-    likes: Math.floor(Math.random() * 500),
-    rating: (Math.random() * 1 + 4).toFixed(1),
-    category: ["Digital Art", "Abstract", "Portraits", "Landscape"][i % 4],
-  }));
+  useEffect(() => {
+    fetchArtworks();
+  }, []);
+
+  const fetchArtworks = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/artworks');
+      setArtworks(res.data);
+    } catch (err) {
+      console.error('Failed to fetch artworks:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -36,7 +58,7 @@ const GalleryPage = () => {
               </span>
             </h1>
             <p className="text-xl text-muted-foreground">
-              Explore thousands of unique artworks from talented artists
+              Explore unique artworks from talented artists
             </p>
           </div>
 
@@ -59,10 +81,10 @@ const GalleryPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="painting">Painting</SelectItem>
                   <SelectItem value="digital">Digital Art</SelectItem>
-                  <SelectItem value="abstract">Abstract</SelectItem>
-                  <SelectItem value="portraits">Portraits</SelectItem>
-                  <SelectItem value="landscape">Landscape</SelectItem>
+                  <SelectItem value="sculpture">Sculpture</SelectItem>
+                  <SelectItem value="photography">Photography</SelectItem>
                 </SelectContent>
               </Select>
               <Select>
@@ -95,69 +117,83 @@ const GalleryPage = () => {
             </div>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Loading artworks...</p>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && artworks.length === 0 && (
+            <div className="text-center py-12">
+              <h3 className="text-2xl font-bold mb-2">No artworks yet</h3>
+              <p className="text-muted-foreground">Be the first to upload artwork!</p>
+            </div>
+          )}
+
           {/* Artworks Grid/List */}
-          <div className={viewMode === "grid" 
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-            : "space-y-4"
-          }>
-            {artworks.map((artwork) => (
-              <Link key={artwork.id} to={`/artwork/${artwork.id}`}>
-                <Card className={viewMode === "grid" 
-                  ? "overflow-hidden hover:shadow-medium transition-all duration-300 group cursor-pointer"
-                  : "hover:shadow-medium transition-all duration-300 group cursor-pointer"
-                }>
-                  <div className={viewMode === "grid" 
-                    ? "aspect-square bg-gradient-hero opacity-20 group-hover:opacity-30 transition-opacity"
-                    : "flex"
+          {!loading && artworks.length > 0 && (
+            <div className={viewMode === "grid"
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              : "space-y-4"
+            }>
+              {artworks.map((artwork) => (
+                <Link key={artwork._id} to={`/artwork/${artwork._id}`}>
+                  <Card className={viewMode === "grid"
+                    ? "overflow-hidden hover:shadow-medium transition-all duration-300 group cursor-pointer"
+                    : "hover:shadow-medium transition-all duration-300 group cursor-pointer"
                   }>
-                    {viewMode === "list" && (
-                      <div className="w-32 h-32 bg-gradient-hero opacity-20 group-hover:opacity-30 transition-opacity flex-shrink-0"></div>
-                    )}
-                    <CardContent className={viewMode === "grid" ? "p-4" : "p-4 flex-1"}>
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1">
-                          <h3 className="font-bold text-lg mb-1">{artwork.title}</h3>
-                          <p className="text-sm text-muted-foreground mb-2">by {artwork.artist}</p>
-                          {viewMode === "list" && (
-                            <p className="text-sm text-muted-foreground mb-2">{artwork.category}</p>
+                    <div className={viewMode === "grid"
+                      ? "aspect-square relative overflow-hidden"
+                      : "flex"
+                    }>
+                      {viewMode === "list" && (
+                        <div className="w-32 h-32 relative overflow-hidden flex-shrink-0">
+                          {artwork.imageUrl ? (
+                            <img src={artwork.imageUrl} alt={artwork.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-hero opacity-20"></div>
                           )}
                         </div>
-                        {viewMode === "list" && (
-                          <span className="text-xl font-bold text-primary">{artwork.price}</span>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="flex items-center space-x-1">
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            <span className="text-sm font-medium">{artwork.rating}</span>
+                      )}
+                      {viewMode === "grid" && (
+                        artwork.imageUrl ? (
+                          <img src={artwork.imageUrl} alt={artwork.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-hero opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                        )
+                      )}
+                      <CardContent className={viewMode === "grid" ? "p-4" : "p-4 flex-1"}>
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h3 className="font-bold text-lg mb-1">{artwork.title}</h3>
+                            <p className="text-sm text-muted-foreground mb-2">by {artwork.artist.name}</p>
+                            {viewMode === "list" && (
+                              <p className="text-sm text-muted-foreground mb-2">{artwork.category}</p>
+                            )}
                           </div>
-                          <div className="flex items-center space-x-1 text-muted-foreground">
-                            <Heart className="w-4 h-4" />
-                            <span className="text-sm">{artwork.likes}</span>
-                          </div>
+                          {viewMode === "list" && (
+                            <span className="text-xl font-bold text-primary">${artwork.price}</span>
+                          )}
                         </div>
-                        {viewMode === "grid" && (
-                          <span className="text-xl font-bold text-primary">{artwork.price}</span>
-                        )}
-                      </div>
-                    </CardContent>
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
-
-          {/* Pagination */}
-          <div className="flex justify-center mt-12">
-            <div className="flex gap-2">
-              <Button variant="outline">Previous</Button>
-              <Button className="bg-gradient-hero border-0">1</Button>
-              <Button variant="outline">2</Button>
-              <Button variant="outline">3</Button>
-              <Button variant="outline">Next</Button>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                              {artwork.category}
+                            </span>
+                          </div>
+                          {viewMode === "grid" && (
+                            <span className="text-xl font-bold text-primary">${artwork.price}</span>
+                          )}
+                        </div>
+                      </CardContent>
+                    </div>
+                  </Card>
+                </Link>
+              ))}
             </div>
-          </div>
+          )}
         </div>
       </div>
       <Footer />
@@ -166,4 +202,3 @@ const GalleryPage = () => {
 };
 
 export default GalleryPage;
-

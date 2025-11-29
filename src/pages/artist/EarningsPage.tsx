@@ -176,3 +176,5 @@ const EarningsPage = () => {
 
 export default EarningsPage;
 
+
+

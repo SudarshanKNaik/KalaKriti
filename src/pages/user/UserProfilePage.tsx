@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,17 +6,62 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Save, User, Mail, Phone, MapPin, Globe, Camera } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
+import api from "@/lib/api";
 
 const UserProfilePage = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+
   const [formData, setFormData] = useState({
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "+1 (555) 123-4567",
-    bio: "Art enthusiast and collector",
-    location: "San Francisco, CA",
-    website: "johndoe.com",
+    name: "",
+    email: "",
+    phone: "",
+    bio: "",
+    location: "",
+    website: "",
   });
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        email: user.email || "",
+        phone: "",
+        bio: "",
+        location: "",
+        website: "",
+      });
+    }
+  }, [user]);
+
+  const getUserInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const handleSave = async () => {
+    try {
+      await api.put('/auth/me', formData);
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -36,7 +81,12 @@ const UserProfilePage = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center space-x-6">
-                  <div className="w-24 h-24 bg-gradient-hero rounded-full"></div>
+                  <Avatar className="w-24 h-24">
+                    <AvatarImage src={user?.profileImage} alt={user?.name} />
+                    <AvatarFallback className="bg-gradient-hero text-white text-2xl">
+                      {user?.name ? getUserInitials(user.name) : 'U'}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
                     <Button variant="outline">
                       <Camera className="mr-2 w-4 h-4" />
@@ -80,6 +130,9 @@ const UserProfilePage = () => {
                       className="pl-10"
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    This is the email you use to log in
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone</Label>
@@ -91,6 +144,7 @@ const UserProfilePage = () => {
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="pl-10"
+                      placeholder="+1 (555) 123-4567"
                     />
                   </div>
                 </div>
@@ -122,6 +176,7 @@ const UserProfilePage = () => {
                       value={formData.location}
                       onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                       className="pl-10"
+                      placeholder="San Francisco, CA"
                     />
                   </div>
                 </div>
@@ -134,8 +189,32 @@ const UserProfilePage = () => {
                       value={formData.website}
                       onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                       className="pl-10"
+                      placeholder="yourwebsite.com"
                     />
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Account Info Display */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Account Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between items-center py-2 border-b">
+                  <span className="text-sm text-muted-foreground">User ID</span>
+                  <span className="text-sm font-mono">{user?.id}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b">
+                  <span className="text-sm text-muted-foreground">Role</span>
+                  <span className="text-sm font-medium capitalize">{user?.role}</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-sm text-muted-foreground">Account Type</span>
+                  <span className="text-sm">
+                    {user?.role === 'both' ? 'Artist & Collector' : user?.role === 'artist' ? 'Artist' : 'Collector'}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -163,7 +242,7 @@ const UserProfilePage = () => {
 
             {/* Save Button */}
             <div className="flex justify-end">
-              <Button className="bg-gradient-hero border-0 hover:opacity-90">
+              <Button onClick={handleSave} className="bg-gradient-hero border-0 hover:opacity-90">
                 <Save className="mr-2 w-4 h-4" />
                 Save Changes
               </Button>
@@ -177,4 +256,3 @@ const UserProfilePage = () => {
 };
 
 export default UserProfilePage;
-

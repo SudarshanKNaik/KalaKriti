@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -70,80 +71,82 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          
-          {/* Authentication Routes */}
-          <Route path="/auth" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/verify-email" element={<VerifyEmailPage />} />
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
 
-          {/* Public Routes */}
-          <Route path="/home" element={<Homepage />} />
-          <Route path="/gallery" element={<GalleryPage />} />
-          <Route path="/artwork/:id" element={<ArtworkDetailPage />} />
-          <Route path="/artists" element={<ArtistsDirectoryPage />} />
-          <Route path="/artists/:id" element={<ArtistProfilePage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
+            {/* Authentication Routes */}
+            <Route path="/auth" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
 
-          {/* User Account Routes */}
-          <Route path="/dashboard" element={<UserDashboard />} />
-          <Route path="/profile" element={<UserProfilePage />} />
-          <Route path="/favorites" element={<FavoritesPage />} />
-          <Route path="/following" element={<FollowingPage />} />
-          <Route path="/orders" element={<OrderHistoryPage />} />
-          <Route path="/addresses" element={<AddressBookPage />} />
+            {/* Public Routes */}
+            <Route path="/home" element={<Homepage />} />
+            <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/artwork/:id" element={<ArtworkDetailPage />} />
+            <Route path="/artists" element={<ArtistsDirectoryPage />} />
+            <Route path="/artists/:id" element={<ArtistProfilePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
 
-          {/* Artist Routes */}
-          <Route path="/artist/dashboard" element={<ArtistDashboard />} />
-          <Route path="/artist/artworks" element={<MyArtworksPage />} />
-          <Route path="/artist/upload" element={<UploadArtPage />} />
-          <Route path="/artist/edit/:id" element={<EditArtPage />} />
-          <Route path="/artist/stats/:id" element={<ArtworkStatsPage />} />
-          <Route path="/artist/orders" element={<OrdersManagementPage />} />
-          <Route path="/artist/orders/:id" element={<OrderDetailsPage />} />
-          <Route path="/artist/earnings" element={<EarningsPage />} />
-          <Route path="/artist/analytics" element={<SalesAnalyticsPage />} />
-          <Route path="/artist/commissions" element={<CommissionRequestsPage />} />
+            {/* User Account Routes */}
+            <Route path="/dashboard" element={<UserDashboard />} />
+            <Route path="/profile" element={<UserProfilePage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/following" element={<FollowingPage />} />
+            <Route path="/orders" element={<OrderHistoryPage />} />
+            <Route path="/addresses" element={<AddressBookPage />} />
 
-          {/* E-commerce Routes */}
-          <Route path="/cart" element={<ShoppingCartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+            {/* Artist Routes */}
+            <Route path="/artist/dashboard" element={<ArtistDashboard />} />
+            <Route path="/artist/artworks" element={<MyArtworksPage />} />
+            <Route path="/artist/upload" element={<UploadArtPage />} />
+            <Route path="/artist/edit/:id" element={<EditArtPage />} />
+            <Route path="/artist/stats/:id" element={<ArtworkStatsPage />} />
+            <Route path="/artist/orders" element={<OrdersManagementPage />} />
+            <Route path="/artist/orders/:id" element={<OrderDetailsPage />} />
+            <Route path="/artist/earnings" element={<EarningsPage />} />
+            <Route path="/artist/analytics" element={<SalesAnalyticsPage />} />
+            <Route path="/artist/commissions" element={<CommissionRequestsPage />} />
 
-          {/* Discovery Routes */}
-          <Route path="/categories" element={<CategoriesPage />} />
-          <Route path="/categories/:category" element={<CategoriesPage />} />
-          <Route path="/search" element={<SearchResultsPage />} />
-          <Route path="/collections" element={<CollectionsPage />} />
-          <Route path="/new-arrivals" element={<NewArrivalsPage />} />
-          <Route path="/popular" element={<PopularPage />} />
+            {/* E-commerce Routes */}
+            <Route path="/cart" element={<ShoppingCartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
 
-          {/* Community Routes */}
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/activity" element={<ActivityFeedPage />} />
-          <Route path="/messages" element={<MessagesPage />} />
-          <Route path="/reviews" element={<ReviewsPage />} />
+            {/* Discovery Routes */}
+            <Route path="/categories" element={<CategoriesPage />} />
+            <Route path="/categories/:category" element={<CategoriesPage />} />
+            <Route path="/search" element={<SearchResultsPage />} />
+            <Route path="/collections" element={<CollectionsPage />} />
+            <Route path="/new-arrivals" element={<NewArrivalsPage />} />
+            <Route path="/popular" element={<PopularPage />} />
 
-          {/* Support Routes */}
-          <Route path="/help" element={<HelpCenterPage />} />
-          <Route path="/shipping" element={<ShippingInfoPage />} />
-          <Route path="/returns" element={<ReturnsPolicyPage />} />
-          <Route path="/privacy" element={<PrivacyPolicyPage />} />
-          <Route path="/terms" element={<TermsOfServicePage />} />
+            {/* Community Routes */}
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/activity" element={<ActivityFeedPage />} />
+            <Route path="/messages" element={<MessagesPage />} />
+            <Route path="/reviews" element={<ReviewsPage />} />
 
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+            {/* Support Routes */}
+            <Route path="/help" element={<HelpCenterPage />} />
+            <Route path="/shipping" element={<ShippingInfoPage />} />
+            <Route path="/returns" element={<ReturnsPolicyPage />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsOfServicePage />} />
+
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
